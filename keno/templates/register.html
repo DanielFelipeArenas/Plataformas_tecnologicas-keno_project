@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Keno - Register</title>
+
+<style>
+body {
+    background: #002447;
+    background-image: url("{% static 'keno/assets/detrasKeno.png' %}");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.box {
+    width: 420px;
+    background: rgba(0, 0, 0, 0.90);
+    padding: 40px;
+    border-radius: 10px;
+    text-align: left;
+    color: white;
+}
+
+.logo {
+    display: block;
+    margin: 0 auto 20px auto;
+    width: 180px;
+}
+
+label {
+    font-size: 16px;
+    margin-left: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0 15px 0;
+    border-radius: 5px;
+    border: none;
+    font-size: 16px;
+}
+
+button {
+    width: 160px;
+    padding: 10px;
+    margin: 20px auto 0 auto;
+    display: block;
+    background: #d93333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #c02a2a;
+}
+
+.error {
+    color: #ff6b6b;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.back-link {
+    margin-top: 15px;
+    color: #4fc3f7;
+    cursor: pointer;
+    text-decoration: underline;
+    text-align: center;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+    <div class="box">
+
+        <img src="{% static 'keno/assets/Keno.png' %}" class="logo" alt="Keno">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{% url 'register' %}">
+            {% csrf_token %}
+            
+            <label>User name:</label>
+            <input type="text" name="username" required autocomplete="username">
+
+            <label>Password:</label>
+            <input type="password" name="password" required autocomplete="new-password">
+
+            <label>E-mail:</label>
+            <input type="email" name="email" required autocomplete="email">
+
+            <button type="submit">Register</button>
+        </form>
+
+        <div class="back-link" onclick="goHome()">← Volver al inicio</div>
+        
+        <div style="margin-top: 10px; font-size: 14px; text-align: center;">
+            ¿Ya tienes cuenta? <span class="back-link" style="display:inline; margin:0;" onclick="window.location.href='/login/'">Inicia sesión</span>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'keno/js/script.js' %}"></script>
+</body>
+</html>

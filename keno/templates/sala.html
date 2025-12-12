@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala de Espera - Keno</title>
+
+    <style>
+        body {
+            background: #002447;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            color: white;
+            background-image: url("{% static 'keno/assets/detrasKeno.png' %}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+        }
+
+        .panel {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 12px;
+            width: 85%;
+            border-radius: 15px;
+            margin: auto;
+            box-shadow: 0 0 10px black;
+        }
+
+        .panel-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .panel-box {
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 20px;
+        }
+
+        .top-section {
+            display: flex;
+            width: 85%;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .left-block, .right-block {
+            flex: 1;
+        }
+
+        .start-button {
+            background: #0077b6;
+            padding: 20px 50px;
+            border-radius: 60px;
+            font-size: 32px;
+            color: white;
+            border: none;
+            cursor: not-allowed;
+            opacity: 0.5;
+            transition: 0.3s;
+        }
+
+        .start-button.enabled {
+            cursor: pointer;
+            opacity: 1;
+            background: #35a235;
+        }
+
+        .center-logo {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .center-logo img {
+            width: 260px;
+        }
+
+        .user-item {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="top-section">
+
+            <div class="panel left-block">
+                <div class="panel-title">Logged in users:</div>
+                <div class="panel-box" id="usersBox">Cargando jugadores...</div>
+            </div>
+
+            <div class="panel right-block">
+                <div class="panel-title">Start time:</div>
+                <div class="panel-box" id="timerBox">02:00</div>
+            </div>
+
+            <div class="panel" style="flex: 0.6; text-align:center;">
+                <button id="startButton" class="start-button" disabled>Start</button>
+            </div>
+        </div>
+
+        <div class="center-logo">
+            <img src="{% static 'keno/assets/Keno.png' %}" class="logo" alt="Keno Logo">
+        </div>
+
+        <div class="panel" style="width: 85%;">
+            <div class="panel-title">Your nickname:</div>
+            <div class="panel-box" id="nicknameBox">{{ jugador.nickname }}</div>
+        </div>
+
+        <div class="panel" style="width: 85%;">
+            <div class="panel-title">Invitation URL:</div>
+            <div class="panel-box" id="urlBox">{{ url_invitacion }}</div>
+        </div>
+
+    </div>
+
+    <script>
+        // Datos de Django
+        const salaId = "{{ sala.id }}";
+        const nickname = "{{ jugador.nickname }}";
+        
+        // WebSocket
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/sala/${salaId}/`;
+        const socket = new WebSocket(wsUrl);
+
+        let time = null; // Se sincronizará con el servidor
+        let interval = null;
+        let timerSynced = false;
+
+        socket.onopen = function(e) {
+            console.log("WebSocket conectado");
+            socket.send(JSON.stringify({
+                'type': 'player_joined',
+                'nickname': nickname
+            }));
+        };
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            
+            if (data.type === 'sala_update') {
+                // Actualizar lista de jugadores
+                const usersBox = document.getElementById('usersBox');
+                if (data.players && data.players.length > 0) {
+                    usersBox.innerHTML = data.players.map(p => 
+                        `<div class="user-item">👤 ${p}</div>`
+                    ).join('');
+                }
+                
+                // Sincronizar tiempo si es la primera vez
+                if (!timerSynced && data.tiempo !== undefined) {
+                    time = data.tiempo;
+                    timerSynced = true;
+                    iniciarTemporizador();
+                }
+            }
+            
+            if (data.type === 'timer_sync') {
+                // Sincronizar tiempo con otros usuarios
+                time = data.tiempo;
+                actualizarDisplay();
+            }
+        };
+
+        socket.onerror = function(error) {
+            console.error('WebSocket error:', error);
+        };
+
+        function iniciarTemporizador() {
+            const timerBox = document.getElementById("timerBox");
+            const startButton = document.getElementById("startButton");
+            
+            if (interval) clearInterval(interval);
+            
+            interval = setInterval(() => {
+                if (time <= 0) {
+                    clearInterval(interval);
+                    startButton.classList.add("enabled");
+                    window.location.href = "/inicio/";
+                    //startButton.removeAttribute("disabled");
+                } else {
+                    time--;
+                    actualizarDisplay();
+                    
+                    // Enviar actualización cada 5 segundos para mantener sincronizado
+                    if (time % 5 === 0) {
+                        socket.send(JSON.stringify({
+                            'type': 'timer_update',
+                            'tiempo': time
+                        }));
+                    }
+                }
+            }, 1000);
+        }
+
+        function actualizarDisplay() {
+            const timerBox = document.getElementById("timerBox");
+            let min = Math.floor(time / 60);
+            let sec = time % 60;
+            timerBox.innerText = `${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+        }
+
+        document.getElementById("startButton").addEventListener("click", function() {
+            if (!this.disabled) {
+                //window.location.href = "/inicio/";
+            }
+        });
+    </script>
+
+</body>
+</html>

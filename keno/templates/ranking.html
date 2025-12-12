@@ -1,0 +1,149 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ranking - Keno</title>
+    <style>
+        body {
+            margin: 0;
+            background: #002447;
+            font-family: Arial, sans-serif;
+            color: white;
+            background-image: url("{% static 'keno/assets/detrasKeno.png' %}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: 50px auto;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 30px;
+            border-radius: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 48px;
+            color: #ffd700;
+            text-shadow: 3px 3px 6px black;
+            margin-bottom: 30px;
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ranking-table thead {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+
+        .ranking-table th {
+            padding: 15px;
+            font-size: 20px;
+            border: 2px solid #ffd700;
+        }
+
+        .ranking-table td {
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .ranking-table tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .posicion {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .pos-1 { color: #ffd700; }
+        .pos-2 { color: #c0c0c0; }
+        .pos-3 { color: #cd7f32; }
+
+        .btn-volver {
+            display: block;
+            width: 200px;
+            margin: 30px auto 0;
+            padding: 15px;
+            background: #35a235;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-volver:hover {
+            background: #2d8a2d;
+        }
+
+        .logo {
+            width: 180px;
+            display: block;
+            margin: 0 auto 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="{% static 'keno/assets/Keno.png' %}" class="logo">
+        
+        <h1>🏆 RANKING 🏆</h1>
+
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>Posición</th>
+                    <th>Jugador</th>
+                    <th>Puntos Totales</th>
+                    <th>Partidas</th>
+                    <th>Promedio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for jugador in ranking %}
+                <tr>
+                    <td class="posicion pos-{{ forloop.counter }}">
+                        {% if forloop.counter == 1 %}🥇
+                        {% elif forloop.counter == 2 %}🥈
+                        {% elif forloop.counter == 3 %}🥉
+                        {% else %}{{ forloop.counter }}
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ jugador.nickname }}</strong></td>
+                    <td>{{ jugador.puntos_totales }}</td>
+                    <td>{{ jugador.partidas_jugadas }}</td>
+                    <td>
+                        {% if jugador.partidas_jugadas > 0 %}
+                            {{ jugador.promedio|floatformat:1 }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 30px;">
+                        No hay jugadores registrados aún
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{% url 'inicio' %}" class="btn-volver">← Volver al Juego</a>
+    </div>
+
+</body>
+</html>

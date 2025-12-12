@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Keno - Inicio</title>
+
+<style>
+body {
+    margin: 0;
+    background-color: #002447;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    color: white;
+
+    background-image: url("{% static 'keno/assets/detrasKeno.png' %}");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: top center;
+}
+
+.container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo {
+    width: 500px;
+    margin-bottom: 40px;
+}
+
+button {
+    width: 350px;
+    padding: 18px;
+    margin: 15px;
+    font-size: 26px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+}
+
+.login { background: #35a235; }
+.register { background: #d93333; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <img src="{% static 'keno/assets/Keno.png' %}" class="logo">
+
+    <button class="login" onclick="goLogin()">Login</button>
+    <button class="register" onclick="goRegister()">Register</button>
+
+</div>
+
+<script src="{% static 'keno/js/script.js' %}"></script>
+</body>
+</html>
