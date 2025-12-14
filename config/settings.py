@@ -9,7 +9,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 #DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 DEBUG = True
 
-ALLOWED_HOSTS = ['wafd-keno-bpb5enfweff4erax.canadacentral-01.azurewebsites.net'] # En producción, especifica tu dominio
+ALLOWED_HOSTS = ['wafd-keno-bpb5enfweff4erax.canadacentral-01.azurewebsites.net','169.254.129.4'] # En producción, especifica tu dominio
 
 # Configuración para Azure
 CSRF_TRUSTED_ORIGINS = [
